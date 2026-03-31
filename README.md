@@ -86,3 +86,10 @@ OUTPUT:
 - Annotated checkpoints array
 - BigDes commentary inline
 - Human review flags per stage
+---
+
+## External Prompt Link (Pending Import)
+
+Received shared ChatGPT link: `https://chatgpt.com/s/cd_69cbb9ba7358819186abb0d33b0adc01`.
+
+This environment cannot directly fetch ChatGPT shared links (HTTP 403), so the prompt/content should be pasted into this repository (for example in `PROMPT.md`) before implementation can continue.
