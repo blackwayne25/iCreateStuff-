@@ -1,0 +1,3 @@
+// Stage 2: Lottie Animations - Mobile/tablet responsive animations with BigDes overlay, human review flagged
+
+// Your Lottie animation code goes here...
