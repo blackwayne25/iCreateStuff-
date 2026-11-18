@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1630"><title>Comedy Commandos — Guest Edition</title><style>html,body{margin:0;min-height:100%;background:#080a17;color:#fff;font:16px system-ui}main{padding:32px 20px;max-width:620px;margin:10vh auto;text-align:center}h1{font-size:clamp(26px,5vw,48px);color:#ffe250;text-shadow:2px 2px #de2d9b}p{line-height:1.5}progress{width:100%;height:16px;accent-color:#ffdb43}#err{color:#ff9191}button{padding:12px 20px;background:#222f59;border:2px solid #27d9fd;border-radius:10px;color:white;font-weight:900}</style></head><body><main><h1>COMEDY COMMANDOS</h1><p>RUC Nuclear Guest Edition · Loading fighters and arena soundtracks…</p><progress id="bar" value="0" max="100"></progress><p id="status">Preparing the arena…</p><p id="err"></p></main><script>
+(async()=>{const status=document.getElementById('status'),bar=document.getElementById('bar'),err=document.getElementById('err');try{
+const count=31; const blocks=await Promise.all(Array.from({length:count},async(_,i)=>{const path='c'+String(i).padStart(3,'0')+'.txt';const r=await fetch(path,{cache:'force-cache'});if(!r.ok)throw new Error('Missing game package '+path+' ('+r.status+')');const t=await r.text();bar.value=Math.round(45*(i+1)/count);return t.trim()}));
+status.textContent='Opening the arena…';bar.value=75;
+const raw=atob(blocks.join(''));const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+if(!('DecompressionStream' in window))throw new Error('Please open this link in an updated Chrome, Edge, or Safari browser.');
+const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+const html=await new Response(stream).text();
+const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html)))).map(b=>b.toString(16).padStart(2,'0')).join('');if(hash!=='f9cc07236e6236840ee319cbc13b7caa9de84a214fdd4e7541bd0fc77b0d7248')throw new Error('Game package did not pass its integrity check.');
+bar.value=100;document.open();document.write(html);document.close();
+}catch(e){status.textContent='The game could not open';err.textContent=e.message;bar.value=0;}})();
+</script></body></html>
