@@ -7,6 +7,12 @@ if(!('DecompressionStream' in window))throw new Error('Please open this link in 
 const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
 const html=await new Response(stream).text();
 const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html)))).map(b=>b.toString(16).padStart(2,'0')).join('');if(hash!=='f9cc07236e6236840ee319cbc13b7caa9de84a214fdd4e7541bd0fc77b0d7248')throw new Error('Game package did not pass its integrity check.');
-bar.value=100;document.open();document.write(html);document.close();
+const upgradeResponse=await fetch('weapon_arts_v2.js',{cache:'no-store'});if(!upgradeResponse.ok)throw new Error('Move upgrade missing ('+upgradeResponse.status+')');
+const upgrade=await upgradeResponse.text();
+const upgradeHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(upgrade)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(upgradeHash!=='31d0f0b24f632bcb4aef5811fb54a048dbbb107a699bc53d060f4d776941cf02')throw new Error('Weapon Arts integrity check failed');
+status.textContent='Equipping all 26 fighters…';
+const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>';
+bar.value=100;document.open();document.write(html.replace('</body>',scriptTag+'</body>'));document.close();
 }catch(e){status.textContent='The game could not open';err.textContent=e.message;bar.value=0;}})();
 </script></body></html>
