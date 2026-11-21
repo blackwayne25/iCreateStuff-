@@ -15,8 +15,13 @@ const jRes=await fetch('jstyles_stunner_v1.js',{cache:'no-store'});if(!jRes.ok)t
 const jCode=await jRes.text();
 const jHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(jCode)))).map(b=>b.toString(16).padStart(2,'0')).join('');
 if(jHash!=='51a9af75225af74097890e78169af0783f7d6ee5709f5b03e87dd8121667523a')throw new Error('J-Styles update integrity check failed');
-status.textContent='Equipping all 27 fighters and J-Styles folding chair…';
-const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>'+'<scr'+'ipt>'+jCode+'</scr'+'ipt>';
-bar.value=100;document.open();document.write(html.replace('</body>',scriptTag+'</body>'));document.close();
+status.textContent='Loading 27 fighters and cinematic visual director…';
+const [vcssRes,vjsRes]=await Promise.all([fetch('cinematic_visual_v4.css',{cache:'no-store'}),fetch('cinematic_visual_v4.js',{cache:'no-store'})]);
+if(!vcssRes.ok||!vjsRes.ok)throw new Error('Cinematic visual update unavailable');
+const [vcss,vjs]=await Promise.all([vcssRes.text(),vjsRes.text()]);
+const digest=async x=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(await digest(vcss)!=='6b217c0e9d89bdbeb5a08ac906bc06de44617936f1338435c9191ca730e89729'||await digest(vjs)!=='0f2312317cee4838f91df8a7a2f9ba5f440c7b1b75fcc4f50ae4afdd88d17f6a')throw new Error('Cinematic package integrity mismatch');
+const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>'+'<scr'+'ipt>'+jCode+'</scr'+'ipt>'+'<scr'+'ipt>'+vjs+'</scr'+'ipt>';
+bar.value=100;document.open();document.write(html.replace('</head>','<style>'+vcss+'</style></head>').replace('</body>',scriptTag+'</body>'));document.close();
 }catch(e){status.textContent='The game could not open';err.textContent=e.message;bar.value=0;}})();
 </script></body></html>
