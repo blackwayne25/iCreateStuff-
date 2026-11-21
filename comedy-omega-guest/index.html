@@ -11,8 +11,12 @@ const upgradeResponse=await fetch('weapon_arts_v2.js',{cache:'no-store'});if(!up
 const upgrade=await upgradeResponse.text();
 const upgradeHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(upgrade)))).map(b=>b.toString(16).padStart(2,'0')).join('');
 if(upgradeHash!=='7a3484f06bc506cdcf803aaa8e9a798b8350554ab175d3b55ad11e660dd61fde')throw new Error('Weapon Arts integrity check failed');
-status.textContent='Equipping all 26 fighters…';
-const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>';
+const jRes=await fetch('jstyles_stunner_v1.js',{cache:'no-store'});if(!jRes.ok)throw new Error('J-Styles package missing ('+jRes.status+')');
+const jCode=await jRes.text();
+const jHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(jCode)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(jHash!=='51a9af75225af74097890e78169af0783f7d6ee5709f5b03e87dd8121667523a')throw new Error('J-Styles update integrity check failed');
+status.textContent='Equipping all 27 fighters and J-Styles folding chair…';
+const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>'+'<scr'+'ipt>'+jCode+'</scr'+'ipt>';
 bar.value=100;document.open();document.write(html.replace('</body>',scriptTag+'</body>'));document.close();
 }catch(e){status.textContent='The game could not open';err.textContent=e.message;bar.value=0;}})();
 </script></body></html>
