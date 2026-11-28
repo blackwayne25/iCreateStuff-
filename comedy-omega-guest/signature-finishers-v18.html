@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1630"><title>Comedy Commandos — Signature Finishers v18</title><style>html,body{margin:0;min-height:100%;background:#080a17;color:#fff;font:16px system-ui}main{padding:32px 20px;max-width:620px;margin:10vh auto;text-align:center}h1{font-size:clamp(26px,5vw,48px);color:#ffe250;text-shadow:2px 2px #de2d9b}p{line-height:1.5}progress{width:100%;height:16px;accent-color:#ffdb43}#err{color:#ff9191}button{padding:12px 20px;background:#222f59;border:2px solid #27d9fd;border-radius:10px;color:white;font-weight:900}</style></head><body><main><h1>COMEDY COMMANDOS</h1><p>Signature Finishers v18 · Loading the original 27-fighter roster…</p><progress id="bar" value="0" max="100"></progress><p id="status">Preparing the arena…</p><p id="err"></p></main><script>
+(async()=>{const status=document.getElementById('status'),bar=document.getElementById('bar'),err=document.getElementById('err');try{
+const count=31; const blocks=await Promise.all(Array.from({length:count},async(_,i)=>{const path='c'+String(i).padStart(3,'0')+'.txt';const r=await fetch(path,{cache:'force-cache'});if(!r.ok)throw new Error('Missing game package '+path+' ('+r.status+')');const t=await r.text();bar.value=Math.round(45*(i+1)/count);return t.trim()}));
+status.textContent='Opening the arena…';bar.value=75;
+const raw=atob(blocks.join(''));const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
+if(!('DecompressionStream' in window))throw new Error('Please open this link in an updated Chrome, Edge, or Safari browser.');
+const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+const html=await new Response(stream).text();
+const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(html)))).map(b=>b.toString(16).padStart(2,'0')).join('');if(hash!=='f9cc07236e6236840ee319cbc13b7caa9de84a214fdd4e7541bd0fc77b0d7248')throw new Error('Game package did not pass its integrity check.');
+const upgradeResponse=await fetch('weapon_arts_v2.js',{cache:'no-store'});if(!upgradeResponse.ok)throw new Error('Move upgrade missing ('+upgradeResponse.status+')');
+const upgrade=await upgradeResponse.text();
+const upgradeHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(upgrade)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(upgradeHash!=='7a3484f06bc506cdcf803aaa8e9a798b8350554ab175d3b55ad11e660dd61fde')throw new Error('Weapon Arts integrity check failed');
+const jRes=await fetch('jstyles_stunner_v1.js',{cache:'no-store'});if(!jRes.ok)throw new Error('J-Styles package missing ('+jRes.status+')');
+const jCode=await jRes.text();
+const jHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(jCode)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(jHash!=='51a9af75225af74097890e78169af0783f7d6ee5709f5b03e87dd8121667523a')throw new Error('J-Styles update integrity check failed');
+status.textContent='Loading 27 fighters and cinematic visual director…';
+const [vcssRes,vjsRes]=await Promise.all([fetch('cinematic_visual_v4.css',{cache:'no-store'}),fetch('cinematic_visual_v4.js',{cache:'no-store'})]);
+if(!vcssRes.ok||!vjsRes.ok)throw new Error('Cinematic visual update unavailable');
+const [vcss,vjs]=await Promise.all([vcssRes.text(),vjsRes.text()]);
+const digest=async x=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(x)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+if(await digest(vcss)!=='43fa01dffe2f34573e37219592d2e3bdb0ff1efe222b257e4e30b3168fe140ba'||await digest(vjs)!=='031fb4e18078c7d468908d6eddbbae3c090ccde1b32414881b39fde36ea9ecf1')throw new Error('Cinematic package integrity mismatch');
+const sigRes=await fetch('signature-finishers-v18.js',{cache:'no-store'});if(!sigRes.ok)throw Error('Signature moves missing');const sig=await sigRes.text();if(await digest(sig)!=='f96020af306a915f6188bd89f6fcfec6c625966dfafc0e60b55f70d0164f0eb4')throw Error('Signature moves integrity mismatch');const storyGate='if(flawless){progress.flawlessBossClears++';if(html.split(storyGate).length!==2)throw Error('Story unlock gate mismatch');const patched=html.replace(storyGate,"if(flawless&&mode==='story'){progress.flawlessBossClears++").replace('in Story/Arcade, and she joins','in Story mode, and she joins').replace('in Story/Arcade to unlock Honey','in Story mode to unlock Honey');const scriptTag='<scr'+'ipt>'+upgrade+'</scr'+'ipt>'+'<scr'+'ipt>'+jCode+'</scr'+'ipt>'+'<scr'+'ipt>'+vjs+'</scr'+'ipt>'+'<scr'+'ipt>'+sig+'</scr'+'ipt>';
+bar.value=100;document.open();document.write(patched.replace('</head>','<style>'+vcss+'</style></head>').replace('</body>',scriptTag+'</body>'));document.close();
+}catch(e){status.textContent='The game could not open';err.textContent=e.message;bar.value=0;}})();
+</script></body></html>
